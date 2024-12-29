@@ -1,7 +1,7 @@
 """
 Databases Models.
 """
-from django.conf import settings
+from django.conf import settings # noqa
 from django.db import models # noqa
 """ https://docs.djangoproject.com/en/2.2/topics/auth/customizing/#django.contrib.auth.models.AbstractBaseUser.get_username:~:text=Importing-,AbstractBaseUser,-AbstractBaseUser%20and%20BaseUserManager """ # noqa
 from django.contrib.auth.models import ( AbstractBaseUser, BaseUserManager, PermissionsMixin ) # noqa
@@ -34,6 +34,8 @@ class UserManager(BaseUserManager):
 
 
 """ PermissionsMixin = Functioonality for the permiussions & fields. """
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     """ User in the system."""
 
@@ -46,19 +48,3 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
-
-class Recipe(models.Model):
-    """ Recipe object. """
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-    )
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    time_minutes = models.IntegerField()
-    price = models.DecimalField(max_digits=5, decimal_places=2)
-    link = models.CharField(max_length=255, blank=True)
-
-    def __str__(self):
-        return self.title
-

@@ -12,7 +12,7 @@
 
 #     def setUp(self):
 #         """ Create user and Client. """
-#         """ Frist, we create a superuser. And then we create a client. And then we create test regularily user in the database. """
+#         """ Frist, we create a superuser. And then we create a client. And then we create test regularily user in the database. """ # noqa
 #         self.client = Client()
 #         self.admin_user = get_user_model().objects.create_superuser(
 #             email='admin@example.com',
@@ -25,11 +25,11 @@
 #             name='Test User',
 #         )
 
-#     """ Reverse document: https://docs.djangoproject.com/en/5.1/ref/contrib/admin/#:~:text=they%20were%20logged.-,Reversing%20admin%20URLs,-%C2%B6"""
+#     """ Reverse document: https://docs.djangoproject.com/en/5.1/ref/contrib/admin/#:~:text=they%20were%20logged.-,Reversing%20admin%20URLs,-%C2%B6"""   # noqa
 #     def test_users_listed(self):
 #         """Test that users are listed on user page."""
 #         """ A unit Test for the user lists. """
-#         """ admin:core_user_changelist is the url that pull from the django admin. """
+#         """ admin:core_user_changelist is the url that pull from the django admin. """ # noqa
 #         url = reverse('admin:core_user_changelist')
 #         res = self.client.get(url)
 
@@ -39,11 +39,11 @@
 
 #     def test_edit_user_page(self):
 #         """Test that the user edit page works."""
-#         """ admin:core_user_change, this is url for the change user page, and we need to pass specific id to change the user. """
+#         """ admin:core_user_change, this is url for the change user page, and we need to pass specific id to change the user. """ # noqa
 #         url = reverse('admin:core_user_change', args=[self.user.id])
 #         res = self.client.get(url)
 
-#         """Ensure that the page is working. So, we check the HTTP status code is 200."""
+#         """Ensure that the page is working. So, we check the HTTP status code is 200.""" # noqa
 #         self.assertEqual(res.status_code, 200)
 
 #     def test_create_user_page(self):

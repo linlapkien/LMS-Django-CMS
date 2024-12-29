@@ -25,7 +25,7 @@
 #         self.assertTrue(user.check_password(password))
 
 #     def test_new_user_email_normalized(self):
-#         """Test the email for a new user is normalized. We define list of sample emails and expected emails. And we literating list of sample emails and creating user with sample email. And we are checking the email is normalized or not. """
+#         """Test the email for a new user is normalized. We define list of sample emails and expected emails. And we literating list of sample emails and creating user with sample email. And we are checking the email is normalized or not. """  # noqa
 #         sample_emails = [
 #             ['test1@EXAMPLE.com', 'test1@example.com'],
 #             ['Test2@Example.com', 'Test2@example.com'],
@@ -33,7 +33,7 @@
 #             ['test4@example.COM', 'test4@example.com'],
 #         ]
 #         for email, expected in sample_emails:
-#             """ We not testing the password here. So i will pass the password as sample123. """
+#             """ We not testing the password here. So i will pass the password as sample123. """  # noqa
 #             user = get_user_model().objects.create_user(email, 'sample123')
 #             self.assertEqual(user.email, expected)
 
@@ -50,9 +50,6 @@
 #         )
 
 #         """ Field provided by PermissionsMixin """
-#         """ In order to access Django admin, is_staff be True. Allow you to login to Django admin.  superuser is_superuser be True. allow you to access everything insite Django admin. """
+#         """ In order to access Django admin, is_staff be True. Allow you to login to Django admin.  superuser is_superuser be True. allow you to access everything insite Django admin. """  # noqa
 #         self.assertTrue(user.is_superuser)
 #         self.assertTrue(user.is_staff)
-
-
-
