@@ -1,12 +1,12 @@
 """
     Tests for model.
 """
-from decimal import Decimal
+from decimal import Decimal # noqa
 
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 
-from core import models
+from core import models # noqa
 
 
 class ModelTests(TestCase):
@@ -17,8 +17,8 @@ class ModelTests(TestCase):
         email = 'test@example.com'
         password = 'testpass123'
         user = get_user_model().objects.create_user(
-            email = email,
-            password = password,
+            email=email,
+            password=password,
         )
 
         self.assertEqual(user.email, email)

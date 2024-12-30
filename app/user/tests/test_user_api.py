@@ -14,7 +14,7 @@ CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
 ME_URL = reverse('user:me')
 
-""" Generic params, used in tests """
+
 def create_user(**params):
     """ Create and return a new user """
     return get_user_model().objects.create_user(**params)
@@ -36,13 +36,13 @@ class PublicUserApiTests(TestCase):
         """ post payload to the create user API """
         res = self.client.post(CREATE_USER_URL, payload)
 
-        """ assert that the response status code is 201 (201 created successfull response) """
+        """ assert that the response status code is 201 (201 created successfull response) """ # noqa
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         """ check the user object from the database """
         user = get_user_model().objects.get(email=payload['email'])
-        """ Verifies the password was hashed (as check_password will validate the hash, not the plaintext password)."""
+        """ Verifies the password was hashed (as check_password will validate the hash, not the plaintext password).""" # noqa
         self.assertTrue(user.check_password(payload['password']))
-        """ the API does not return sensitive data like the user's password in the response payload."""
+        """ the API does not return sensitive data like the user's password in the response payload.""" # noqa
         self.assertNotIn('password', res.data)
 
     def test_user_with_email_exists_error(self):
@@ -109,7 +109,7 @@ class PublicUserApiTests(TestCase):
         }
         res = self.client.post(TOKEN_URL, payload)
 
-        """ bad credentials so we don't expect a token in res.data this time. So token will not be generated"""
+        """ bad credentials so we don't expect a token in res.data this time. So token will not be generated""" # noqa
         self.assertNotIn('token', res.data)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -164,7 +164,7 @@ class PrivateUserApiTests(TestCase):
         payload = {'name': 'new name', 'password': 'newpassword123'}
         """ Patch request to update the ME_URL with the payload """
         res = self.client.patch(ME_URL, payload)
-        """ Refresh the user object from the db, By defaults, they will not refresh automatically """
+        """ Refresh the user object from the db, By defaults, they will not refresh automatically """ # noqa
         self.user.refresh_from_db()
         self.assertEqual(self.user.name, payload['name'])
         self.assertTrue(self.user.check_password(payload['password']))

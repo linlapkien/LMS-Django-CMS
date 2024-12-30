@@ -23,10 +23,9 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
     """ Manage the authenticated user """
     serializer_class = UserSerializer
     authentication_classes = (authentication.TokenAuthentication,)
-    """ We want to make sure that the user is authenticated before they can access this endpoint. """
+    """ We want to make sure that the user is authenticated before they can access this endpoint. """ # noqa
     permission_classes = (permissions.IsAuthenticated,)
 
     def get_object(self):
         """ Retrieve and return authenticated user """
         return self.request.user
-

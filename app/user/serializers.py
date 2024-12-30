@@ -10,9 +10,9 @@ from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
     """ Serializer for the user object """
-    """ Await convert object to Python Object. It takes JSON input that post from API, it validates the input and then converts it to a Python object or model use in the db. """
+    """ Await convert object to Python Object. It takes JSON input that post from API, it validates the input and then converts it to a Python object or model use in the db. """ # noqa
     class Meta:
-        """ Meta class to define the fields that we want to pass to the model """
+        """ Meta class to define the fields that we want to pass to the model """ # noqa
         model = get_user_model()
         fields = ('email', 'password', 'name')
         extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
@@ -44,10 +44,9 @@ class AuthTokenSerializer(serializers.Serializer):
         trim_whitespace=False
     )
 
-    """ Validate the input data """
     def validate(self, attrs):
         """ Validate and authenticate the user """
-        """ Retrieve the email and password from the attrs that user provided in the input"""
+        """ Retrieve the email and password from the attrs that user provided in the input""" # noqa
         email = attrs.get('email')
         password = attrs.get('password')
 
