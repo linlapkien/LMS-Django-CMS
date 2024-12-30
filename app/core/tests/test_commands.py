@@ -6,7 +6,7 @@
 from unittest.mock import patch # noqa
 """ OperationalError is one of possiblility error we may get,
 when we try to connect db, be4 db is ready """
-from psycopg2 import OperationalError as Psycopg2Error # noqa
+from psycopg2 import OperationalError as Psycopg2OpError # noqa
 
 from django.core.management import call_command # noqa
 """ OperationalError another exception that may get through by the db,
@@ -28,7 +28,7 @@ class CommandTests(SimpleTestCase):
     @patch('time.sleep')
     def test_wait_for_db_delay(self, patched_sleep, patched_check):
         """ Test waiting for db when getting OperationalError """
-        patched_check.side_effect = [Psycopg2Error] * 2 + \
+        patched_check.side_effect = [Psycopg2OpError] * 2 + \
             [OperationalError] * 3 + [True]
         call_command('wait_for_db')
         self.assertEqual(patched_check.call_count, 6)
