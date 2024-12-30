@@ -3,6 +3,7 @@ Databases Models.
 """
 from django.conf import settings # noqa
 from django.db import models # noqa
+from django.utils.timezone import now # noqa
 """ https://docs.djangoproject.com/en/2.2/topics/auth/customizing/#django.contrib.auth.models.AbstractBaseUser.get_username:~:text=Importing-,AbstractBaseUser,-AbstractBaseUser%20and%20BaseUserManager """ # noqa
 from django.contrib.auth.models import ( AbstractBaseUser, BaseUserManager, PermissionsMixin ) # noqa
 
@@ -44,7 +45,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     """ is_staff, Login with django admin """
     is_staff = models.BooleanField(default=False)
+    phone_number = models.CharField(max_length=15, null=True, blank=True)
+    role_id = models.SmallIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(default=now, editable=False)
+    updated_at = models.DateTimeField(auto_now=True)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+    def save(self, *args, **kwargs):
+        """Custom save method to update 'updated_at' automatically."""
+        self.updated_at = now()
+        super().save(*args, **kwargs)
+
