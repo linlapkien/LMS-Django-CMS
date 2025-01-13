@@ -9,10 +9,13 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 
+
 CREATE_USER_URL = reverse('user:create')
 """ URL endpoint we gonna add for creating a new token """
 TOKEN_URL = reverse('user:token')
 ME_URL = reverse('user:me')
+REGISTER_URL = reverse('user:register')
+DELETE_USER_URL = reverse('user:delete')
 
 
 def create_user(**params):
@@ -130,6 +133,22 @@ class PublicUserApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_register_user_success(self):
+        """ Test that user can register successfully """
+        payload = {
+            'email': 'testregister@example.com',
+            'password': 'testregister',
+            'name': 'Test Register',
+            'phone_number': '1234567890',
+            'role_id': 1,
+        }
+        res = self.client.post(REGISTER_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        user = get_user_model().objects.get(email=payload['email'])
+        self.assertTrue(user.check_password(payload['password']))
+        self.assertNotIn('password', res.data)
+
 
 class PrivateUserApiTests(TestCase):
     """ Test API requests that require authentication """
@@ -138,7 +157,8 @@ class PrivateUserApiTests(TestCase):
         self.user = create_user(
             email = 'test@example.com',
             password = 'testpass123',
-            name = 'Test Name'
+            name = 'Test Name',
+            phone_number = '1234567890',
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
@@ -150,7 +170,8 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, {
             'name': self.user.name,
-            'email': self.user.email
+            'email': self.user.email,
+            'phone_number': self.user.phone_number
         })
 
     def test_post_me_not_allowed(self):
@@ -161,11 +182,64 @@ class PrivateUserApiTests(TestCase):
 
     def test_update_user_profile(self):
         """ Test updating the user profile for authenticated user """
-        payload = {'name': 'new name', 'password': 'newpassword123'}
+        payload = {'name': 'new name', 'password': 'newpassword123', 'phone_number': '1234567890'}
         """ Patch request to update the ME_URL with the payload """
         res = self.client.patch(ME_URL, payload)
         """ Refresh the user object from the db, By defaults, they will not refresh automatically """ # noqa
         self.user.refresh_from_db()
         self.assertEqual(self.user.name, payload['name'])
         self.assertTrue(self.user.check_password(payload['password']))
+        self.assertEqual(self.user.phone_number, payload['phone_number'])
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+
+class DeleteUserApiTests(TestCase):
+    """ Test the delete user API """
+    def setUp(self):
+        self.superuser = get_user_model().objects.create_superuser(
+            email='superadmin@example.com',
+            password='superadminpass123',
+        )
+        self.regular_user = get_user_model().objects.create_user(
+            email='regularuser@example.com',
+            password='userpass123',
+        )
+        self.client = APIClient()
+
+    def test_delete_user_as_superuser(self):
+        """ Test deleting a user as a superuser """
+        self.client.force_authenticate(user=self.superuser)  # Authenticate as superuser
+        user = create_user(email='user@example.com', password='testpass123')
+        url = f'{DELETE_USER_URL}?email={user.email}'  # Pass email as a query parameter
+
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(get_user_model().objects.filter(email=user.email).exists())
+
+    def test_delete_user_as_regular_user(self):
+        """ Test that a regular user cannot delete a user """
+        self.client.force_authenticate(user=self.regular_user)
+        user = create_user(email='user@example.com', password='testpass123')
+        url = f'{DELETE_USER_URL}?email={user.email}'  # Pass email as a query parameter
+
+        res = self.client.delete(url)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(res.data['error'], "You do not have permission to perform this action.")
+
+    def test_delete_user_not_found(self):
+        """ Test deleting a user that does not exist """
+        self.client.force_authenticate(user=self.superuser)  # Authenticate as superuser
+        url = f'{DELETE_USER_URL}?email=nonexistent@example.com'
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(res.data, {'error': 'User not found.'})
+
+    def test_delete_user_no_email(self):
+        """ Test deleting a user without providing email """
+        self.client.force_authenticate(user=self.superuser)  # Authenticate as superuser
+        res = self.client.delete(DELETE_USER_URL)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(res.data, {'error': 'Email is required'})

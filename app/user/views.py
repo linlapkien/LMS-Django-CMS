@@ -1,11 +1,15 @@
 """
 View for the user API.
 """
-from rest_framework import generics, authentication, permissions
+from rest_framework import generics, authentication, permissions, status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.exceptions import PermissionDenied
 
-from user.serializers import (UserSerializer, AuthTokenSerializer)
+from django.contrib.auth import get_user_model
+from user.serializers import (UserSerializer, AuthTokenSerializer, UserRegisterSerializer, DeleteUserSerializer)
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -29,3 +33,37 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         """ Retrieve and return authenticated user """
         return self.request.user
+
+
+class UserRegisterView(generics.CreateAPIView):
+    """ Register a new user in the system """
+    serializer_class = UserRegisterSerializer
+    authentication_classes = ()
+    permission_classes = ()
+    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+
+
+class DeleteUserView(APIView):
+    """ Delete a user in the system """
+    serializer_class = DeleteUserSerializer
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def delete(self, request):
+        # Check if the authenticated user is a superuser
+        if not request.user.is_superuser:
+            raise PermissionDenied({"error": "You do not have permission to perform this action."})
+
+         # Get email from query params
+        email = request.query_params.get('email')
+        if not email:
+            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+         # Fetch and delete the user
+        user = get_user_model().objects.filter(email=email).first()
+        if not user:
+            return Response({'error': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        user.delete()
+        return Response({'message': 'User deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+

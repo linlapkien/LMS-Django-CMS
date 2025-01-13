@@ -12,4 +12,6 @@ urlpatterns = [
     path('create/', views.CreateUserView.as_view(), name='create'),
     path('token/', views.CreateTokenView.as_view(), name='token'),
     path('me/', views.ManageUserView.as_view(), name='me'),
+    path('register/', views.UserRegisterView.as_view(), name='register'),
+    path('delete/', views.DeleteUserView.as_view(), name='delete'),
 ]

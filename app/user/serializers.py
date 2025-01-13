@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         """ Meta class to define the fields that we want to pass to the model """ # noqa
         model = get_user_model()
-        fields = ('email', 'password', 'name')
+        fields = ('email', 'password', 'name', 'phone_number')
         extra_kwargs = {'password': {'write_only': True, 'min_length': 5}}
 
     """ Override the create function to create a new user """
@@ -65,3 +65,44 @@ class AuthTokenSerializer(serializers.Serializer):
         """ Set the user in the context """
         attrs['user'] = user
         return attrs
+
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    """ Serializer for the user object """
+    """ Await convert object to Python Object. It takes JSON input that post from API, it validates the input and then converts it to a Python object or model use in the db. """ # noqa
+    class Meta:
+        """ Meta class to define the fields that we want to pass to the model """ # noqa
+        model = get_user_model()
+        fields = ('email', 'password', 'name', 'phone_number')
+        extra_kwargs = {
+            'password': {'write_only': True, 'min_length': 5},
+            'role_id': {'default': 1}
+        }
+
+    """ Override the create function to create a new user """
+    """ This function is called when the validation is passed. """
+    def create(self, validated_data):
+        """ Create a new user with encrypted password and return it """
+        return get_user_model().objects.create_user(**validated_data)
+
+    def update(self, instance, validated_data):
+        """ Update a user, setting the password correctly and return it """
+        password = validated_data.pop('password', None)
+        """ Call the ModelSerializer Baseclass update function """
+        user = super().update(instance, validated_data)
+
+        if password:
+            user.set_password(password)
+            user.save()
+
+        return user
+
+class DeleteUserSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+    def validate_email(self, value):
+        """ Ensure the email corresponds to an existing user """
+        User = get_user_model()
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("No user found with this email.")
+        return value

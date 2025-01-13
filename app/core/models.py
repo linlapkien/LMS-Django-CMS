@@ -59,3 +59,108 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.updated_at = now()
         super().save(*args, **kwargs)
 
+
+class Role(models.Model):
+    """Role model. """
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
+class Course(models.Model):
+    """Course model."""
+    title = models.CharField(max_length=255)
+    image_link = models.TextField(null=True, blank=True)
+    instructor = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='instructor_courses'
+    )
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(default=now, editable=False)
+    end_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=[('active', 'Active'), ('inactive', 'Inactive')])
+
+    def __str__(self):
+        return self.title
+
+
+class Lesson(models.Model):
+    """Lesson model."""
+    title = models.CharField(max_length=255)
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='lessons'
+    )
+    content_type = models.CharField(max_length=50, choices=[('pdf', 'PDF'), ('video', 'Video'), ('doc', 'Doc')])
+    description = models.TextField(null=True, blank=True)
+    content_url = models.TextField(null=True, blank=True)
+    order = models.SmallIntegerField()
+    created_at = models.DateTimeField(default=now, editable=False)
+
+    def __str__(self):
+        return self.title
+
+
+class Enrollment(models.Model):
+    """Enrollment model."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='enrollments'
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='enrollments'
+    )
+    status = models.CharField(max_length=20, choices=[('paid', 'Paid'), ('non-paid', 'Non-paid')])
+    enrolled_at = models.DateTimeField(default=now)
+    end_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.user.email} - {self.course.title}'
+
+
+class Payment(models.Model):
+    """Payment model."""
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='payments'
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='payments'
+    )
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=[('success', 'Success'), ('fail', 'Fail'), ('pending', 'Pending')])
+    transaction_date = models.DateTimeField(default=now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.enrollment.user.email} - {self.enrollment.course.title} - {self.amount}'
+
+
+class ListOfUserCourse(models.Model):
+    """List of user course model."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='user_courses'
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.CASCADE,
+        related_name='user_courses'
+    )
+    created_at = models.DateTimeField(default=now, editable=False)
+
+    def __str__(self):
+        return f'{self.user.email} - {self.course.title}'
